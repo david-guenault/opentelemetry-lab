@@ -1,0 +1,35 @@
+---
+
+services:
+  lgtm:
+    image: docker.io/grafana/otel-lgtm:latest
+    container_name: lgtm
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+      - '4317:4317'
+      - '4318:4318'
+    volumes:
+      - ./container/grafana:/data/grafana
+      - ./container/prometheus:/data/prometheus
+      - ./container/loki:/data/loki
+    environment:
+      - GF_PATHs_DATA=/data/grafana
+      - ENABLE_LOGS_LOKI=true
+      - ENABLE_LOGS_PROMETHEUS=true
+      - ENABLE_LOGS
+    extra_hosts:
+      - "host.docker.internal:host-gateway"    
+  node_exporter:
+    container_name: node
+    image: quay.io/prometheus/node-exporter:latest
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    privileged: true

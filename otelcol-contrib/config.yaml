@@ -1,0 +1,85 @@
+receivers:
+  # attention si le collecteur ne tourne pas en root il faudra lui ajouter des capabilities
+  # https://docs.splunk.com/observability/en/gdi/opentelemetry/collector-linux/install-linux-manual.html#permissions
+  # sudo setcap CAP_SYS_PTRACE,CAP_DAC_READ_SEARCH=+eip /opt/otelcol/otelcol-contrib
+  hostmetrics:
+    collection_interval: 10s
+    scrapers:
+      cpu:
+      disk:
+      memory:
+      network:
+      load:
+      filesystem:
+      paging:
+      processes: # process count metrics
+      process: # per process cpu memory and disk io metrics
+      system:
+
+processors:
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 150
+
+
+  # target_info                                                           X                                   X
+  # https://grafana.com/docs/grafana-cloud/send-data/otlp/otlp-format-considerations/#resource-attributes-added-to-target_info-metric
+  # joining in promql
+  # https://www.robustperception.io/left-joins-in-promql/
+  # system_uptime_seconds * on (job,host_name) group_left(os_type) target_info{process_pid=""}
+  # target_info{process_pid="",http_scheme=""}
+  # sum by(process_command_line) (rate(process_cpu_time_seconds_total{state="wait"}[1m]) * on (job) group_left(process_command_line) target_info{http_scheme=""} )
+  # sum by (release) (rate(node_cpu_seconds_total{mode="idle"}[5m]) * on (instance) group_left(release) node_uname_info)
+  # according to this issue > https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/32484#issuecomment-2329372053
+  # the only identifier for join query is job which is a combination of service_namespace and service_name
+  # so the only requirements is to add service_namespace and service_name to the resource
+  transform:
+    error_mode: ignore
+    metric_statements:
+      - context: resource
+        statements:
+          - set(attributes["service.name"], "service_name")
+          - set(attributes["service.namespace"], "service_namespace")    
+      - context: datapoint
+        statements:
+          - set(attributes["process_pid"], resource.attributes["process.pid"]) 
+          - set(attributes["process_owner"], resource.attributes["process.owner"])
+          - set(attributes["process_parent_pid"], resource.attributes["process.parent_pid"])
+          - set(attributes["process_command"], resource.attributes["process.command"])
+          - set(attributes["process_command_line"], resource.attributes["process.command.line"])
+          - set(attributes["process_executable_name"], resource.attributes["process.executable.name"])
+          - set(attributes["process_executable_path"], resource.attributes["process.executable.path"])
+      - context: resource
+        statements:
+          - delete_key(attributes, "process.pid")
+          - delete_key(attributes, "process.executable.name")
+          - delete_key(attributes, "process.executable.path")
+          - delete_key(attributes, "process.command")
+          - delete_key(attributes, "process.command_line")
+          - delete_key(attributes, "process.owner")
+          - delete_key(attributes, "process.parent_pid")
+
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlp:
+    endpoint: localhost:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [batch, memory_limiter, resourcedetection, transform]
+      exporters: [debug,otlp]
+

@@ -46,22 +46,22 @@ processors:
           - set(attributes["service.namespace"], "service_namespace")    
       - context: datapoint
         statements:
-          - set(attributes["process_pid"], resource.attributes["process.pid"]) 
+          - set(attributes["process_pid"], resource.attributes["process.pid"])
           - set(attributes["process_owner"], resource.attributes["process.owner"])
           - set(attributes["process_parent_pid"], resource.attributes["process.parent_pid"])
           - set(attributes["process_command"], resource.attributes["process.command"])
-          - set(attributes["process_command_line"], resource.attributes["process.command.line"])
+          - set(attributes["process_command_line"], resource.attributes["process.command_line"])
           - set(attributes["process_executable_name"], resource.attributes["process.executable.name"])
           - set(attributes["process_executable_path"], resource.attributes["process.executable.path"])
       - context: resource
         statements:
           - delete_key(attributes, "process.pid")
-          - delete_key(attributes, "process.executable.name")
-          - delete_key(attributes, "process.executable.path")
-          - delete_key(attributes, "process.command")
-          - delete_key(attributes, "process.command_line")
           - delete_key(attributes, "process.owner")
           - delete_key(attributes, "process.parent_pid")
+          - delete_key(attributes, "process.command")
+          - delete_key(attributes, "process.command_line")
+          - delete_key(attributes, "process.executable.name")
+          - delete_key(attributes, "process.executable.path")
 
   resourcedetection:
     detectors: ["system"]

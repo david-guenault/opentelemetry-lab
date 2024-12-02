@@ -1,21 +1,26 @@
 OTEL_VERSION=0.114.0
+BIN_FOLDER=/opt/otelcol
+ETC_FOLDER=/etc/otelcol
+TMP_FOLDER=/tmp/otelcol
+SYSTEMD_SERVICES_PATH=/usr/lib/systemd/system/
 
 bootstrap: otelcol-install stack-up otelcol-restart
 
 clean: stack-remove otelcol-remove
 
 otelcol-download:
-	curl -sL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v$(OTEL_VERSION)/otelcol-contrib_$(OTEL_VERSION)_linux_amd64.tar.gz -o /tmp/otelcol-contrib.tar.gz 
+	mkdir -p $(TMP_FOLDER)
+	curl -sL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v$(OTEL_VERSION)/otelcol-contrib_$(OTEL_VERSION)_linux_amd64.tar.gz -o $(TMP_FOLDER)/otelcol-contrib.tar.gz 
 
 otelcol-install: otelcol-download
-	- sudo rm -Rf /tmp/otelcol /opt/otelcol
-	sudo mkdir -p /tmp/otelcol /opt/otelcol /etc/otelcol
-	sudo tar xvf /tmp/otelcol-contrib.tar.gz -C /tmp/otelcol
-	sudo cp -a /tmp/otelcol/otelcol-contrib /opt/otelcol/
-	sudo rm -Rf /tmp/otelcol-contrib.tar.gz /tmp/otelcol
-	sudo cp otelcol.service /etc/systemd/system/otelcol.service
+	sudo mkdir -p $(BIN_FOLDER) $(ETC_FOLDER) 
+	sudo tar xvf $(TMP_FOLDER)/otelcol-contrib.tar.gz -C $(TMP_FOLDER) 
+	sudo cp -a $(TMP_FOLDER)/otelcol-contrib $(BIN_FOLDER)/
+	sudo rm -Rf $(TMP_FOLDER)/otelcol-contrib.tar.gz $(TMP_FOLDER)/* 
+	sudo setcap CAP_SYS_PTRACE,CAP_DAC_READ_SEARCH=+eip $(BIN_FOLDER)/otelcol-contrib
+	sudo cp otelcol.service $(SYSTEMD_SERVICES_PATH)/otelcol.service
+	make otelcol-config
 	sudo systemctl daemon-reload
-
 
 otelcol-logs:
 	journalctl --no-pager -fu otelcol
@@ -33,12 +38,11 @@ otelcol-status:
 	sudo systemctl status otelcol
 
 otelcol-remove: otelcol-stop
-	sudo rm -Rf /opt/otelcol /etc/systemd/system/otelcol.service /etc/otelcol
+	sudo rm -Rf $(BIN_FOLDER) $(TMP_FOLDER) $(ETC_FOLDER) $(SYSTEMD_SERVICES_PATH)/otelcol.service 
 	sudo systemctl daemon-reload
 
 otelcol-config:
-	sudo cp -a otelcol-contrib/config.yaml /etc/otelcol/
-
+	sudo cp -a config.yaml environment $(ETC_FOLDER)
 
 stack-down:
 	docker compose down

@@ -27,6 +27,8 @@ services:
     image: quay.io/prometheus/node-exporter:latest
     command:
       - '--path.rootfs=/host'
+      - '--collector.processes'
+      - '--log.level=debug'
     network_mode: host
     pid: host
     restart: unless-stopped

@@ -1,2 +1,2 @@
 ENDPOINT=192.168.1.33:4317
-OTEL_RESOURCE_ATTRIBUTES="service.name=system,service.namespace=box4prod,service.instance.id=computers"
+OTEL_RESOURCE_ATTRIBUTES="service.name=infrastructure,service.namespace=box4prod,service.instance.id=workstations"

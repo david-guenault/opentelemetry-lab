@@ -24,7 +24,7 @@ processors:
 
 
   # this one is required for hostmetrics
-  transform:
+  transform/hostmetrics:
     error_mode: ignore
     metric_statements:
       # - context: resource
@@ -51,7 +51,7 @@ processors:
           - delete_key(attributes, "process.executable.name")
           - delete_key(attributes, "process.executable.path")
 
-  resourcedetection:
+  resourcedetection/system:
     detectors: ["env", "system"]
     system:
       hostname_sources: ["os"]
@@ -68,7 +68,7 @@ service:
   pipelines:
     metrics/hostmetrics:
       receivers: [hostmetrics]
-      processors: [batch, memory_limiter, resourcedetection, transform]
+      processors: [batch, memory_limiter, resourcedetection/system, transform/hostmetrics]
       exporters: [debug,otlp]
 
 # exemple de requete en jointure

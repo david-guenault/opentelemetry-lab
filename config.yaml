@@ -27,11 +27,11 @@ processors:
   transform:
     error_mode: ignore
     metric_statements:
-      - context: resource
-        statements:
-          - set(attributes["service.name"], "${SERVICE_NAME}") 
-          - set(attributes["service.namespace"], "${SERVICE_NAMESPACE}") 
-          - set(attributes["service.instance.id"], "${SERVICE_INSTANCE_ID}") 
+      # - context: resource
+      #   statements:
+      #     - set(attributes["service.name"], "${SERVICE_NAME}") 
+      #     - set(attributes["service.namespace"], "${SERVICE_NAMESPACE}") 
+      #     - set(attributes["service.instance.id"], "${SERVICE_INSTANCE_ID}") 
       - context: datapoint
         statements:
           - set(attributes["process_pid"], resource.attributes["process.pid"])
@@ -52,7 +52,7 @@ processors:
           - delete_key(attributes, "process.executable.path")
 
   resourcedetection:
-    detectors: ["system"]
+    detectors: ["env", "system"]
     system:
       hostname_sources: ["os"]
 

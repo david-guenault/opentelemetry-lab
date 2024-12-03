@@ -1,4 +1,2 @@
-SERVICE_NAME=system
-SERVICE_NAMESPACE=box4prod
-SERVICE_INSTANCE_ID=workstation
 ENDPOINT=192.168.1.33:4317
+OTEL_RESOURCE_ATTRIBUTES="service.name=system,service.namespace=box4prod,service.instance.id=computers"

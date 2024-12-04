@@ -13,6 +13,9 @@ clean: process-exporter-stop node-exporter-stop otelcol-stop stack-remove proces
 
 bootstrap: otelcol-install node-exporter-install stack-up otelcol-start node-exporter-start
 
+start-all: stack-up process-exporter-start node-exporter-start otelcol-start	
+
+stop-all: otelcol-stop node-exporter-stop process-exporter-stop stack-stop
 process-exporter-download:
 	mkdir -p $(TMP_FOLDER)
 	curl -sL https://github.com/ncabatoff/process-exporter/releases/download/v$(PROCESS_EXPORTER_VERSION)/process-exporter-$(PROCESS_EXPORTER_VERSION).linux-amd64.tar.gz -o $(TMP_FOLDER)/process-exporter.tar.gz 

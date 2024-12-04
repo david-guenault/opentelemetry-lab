@@ -47,6 +47,9 @@ otelcol-config:
 stack-down:
 	docker compose down
 
+stacl-ps:
+	docker compose ps
+
 stack-up:
 	docker compose up -d
 

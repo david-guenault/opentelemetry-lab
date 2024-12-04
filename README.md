@@ -1,8 +1,11 @@
 # opentelemetry lab
 
 just a simple lab to test opentelemetry collector on your local workstation
-This will deploy a stack with preconfigured open telemetry gateway, grafana, loki, tempo and prometheus
-This will deploy also a local opentelemetry collector to send data in the lgtm stack
+This will deploy: 
+- a stack with preconfigured open telemetry gateway, grafana, loki, tempo and prometheus
+- a local opentelemetry collector to send data in the lgtm stack
+- a local prometheus node-exporter which will be scraped by the opentelemetry collector and then send the data to the lgtm stack 
+- a local prometheus process-exporter which will be scraped by the opentelemetry collector and then send the data to the lgtm stack 
 
 ## requirements
 
@@ -13,6 +16,9 @@ This will deploy also a local opentelemetry collector to send data in the lgtm s
 
 edit **cotelcol-contrib/config.yaml** file
 
+## access grafana 
+
+on this url: http://localhost:3000
 
 ## usage
 
@@ -29,6 +35,18 @@ make stack-up
 ```
 
 Start otelcol (this will deploy the config each time)
+
+```bash
+make otelcol-start
+```
+
+Start node-exporter
+
+```bash
+make otelcol-start
+```
+
+Start process-exporter
 
 ```bash
 make otelcol-start

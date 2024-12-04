@@ -28,25 +28,16 @@ processors:
     error_mode: ignore
     metric_statements:
       - context: datapoint
+        # get process pid and executable name from resource attributes and put it on datapoint
+        # this allow to join the target_info metric label 
         statements:
           - set(attributes["process_pid"], resource.attributes["process.pid"])
-          - set(attributes["process_owner"], resource.attributes["process.owner"])
-          - set(attributes["process_parent_pid"], resource.attributes["process.parent_pid"])
-          - set(attributes["process_command"], resource.attributes["process.command"])
-          - set(attributes["process_command_line"], resource.attributes["process.command_line"])
-          - set(attributes["process_executable_name"], resource.attributes["process.executable.name"])
-          - set(attributes["process_executable_path"], resource.attributes["process.executable.path"])
-      - context: resource
-        statements:
-          - delete_key(attributes, "process.pid")
-          - delete_key(attributes, "process.owner")
-          - delete_key(attributes, "process.parent_pid")
-          - delete_key(attributes, "process.command")
-          - delete_key(attributes, "process.command_line")
-          - delete_key(attributes, "process.executable.name")
-          - delete_key(attributes, "process.executable.path")
+          - set(attributes["process_executable_name"], resource.attributes["process.command_line"])
 
   resourcedetection/system:
+    # we get the service.* metrics attributes from environment
+    # caution this is not good for collectors requiring differents values
+    # of service.* for differents collectors (system vs application for example)
     detectors: ["env", "system"]
     system:
       hostname_sources: ["os"]
@@ -65,13 +56,3 @@ service:
       receivers: [hostmetrics]
       processors: [batch, memory_limiter, resourcedetection/system, transform/hostmetrics]
       exporters: [debug,otlp]
-
-# exemple de requete en jointure
-# sum by(device,job, instance) (rate(node_disk_io_time_seconds_total[1m])) * on (job, instance) group_left (nodename,sysname) node_uname_info
-# system_uptime_seconds * on (job,host_name) group_left(os_type) target_info{process_pid=""}
-# sum by(process_command_line) (rate(process_cpu_time_seconds_total{state="wait"}[1m]) * on (job) group_left(process_command_line) target_info{http_scheme=""} )
-# sum by (release) (rate(node_cpu_seconds_total{mode="idle"}[5m]) * on (instance) group_left(release) node_uname_info)
-
-# target_info: https://grafana.com/docs/grafana-cloud/send-data/otlp/otlp-format-considerations/#resource-attributes-added-to-target_info-metric
-# joining in promql: # https://www.robustperception.io/left-joins-in-promql/
-# about service.*: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/32484#issuecomment-2329372053

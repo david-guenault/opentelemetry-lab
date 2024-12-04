@@ -13,6 +13,13 @@ receivers:
       process: # per process cpu memory and disk io metrics
       system:
 
+  prometheus/node-exporter:
+    config:
+      scrape_configs:
+        - job_name: 'node_exporter'
+          static_configs:
+            - targets: ['localhost:9100']
+
 processors:
   batch:
     timeout: 10s
@@ -55,4 +62,8 @@ service:
     metrics/hostmetrics:
       receivers: [hostmetrics]
       processors: [batch, memory_limiter, resourcedetection/system, transform/hostmetrics]
+      exporters: [debug,otlp]
+    metrics/node-exporter:
+      receivers: [prometheus/node-exporter]
+      processors: [batch, memory_limiter, resourcedetection/system]
       exporters: [debug,otlp]

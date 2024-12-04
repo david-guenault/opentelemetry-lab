@@ -6,3 +6,14 @@ providers:
     options:
       path: /otel-lgtm/system-dashboard.json
       foldersFromFilesStructure: false
+  - name: 'Node exporter full'
+    type: file
+    options:
+      path: /otel-lgtm/node-exporter-full.json
+      foldersFromFilesStructure: false
+  - name: 'Opentelemetry hostmetrics'
+    type: file
+    options:
+      path: /otel-lgtm/opentelemetry-hostmetrics.json
+      foldersFromFilesStructure: false
+

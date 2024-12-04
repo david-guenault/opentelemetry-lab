@@ -14,6 +14,7 @@ services:
       - ./container/prometheus:/data/prometheus
       - ./container/loki:/data/loki
       - ./dashboards/system-dashboard.json:/otel-lgtm/system-dashboard.json
+      - ./dashboards/node-exporter-full.json:/otel-lgtm/node-exporter-full.json
       - ./provisioning_dashboards:/otel-lgtm/grafana/conf/provisioning/dashboards
     environment:
       - GF_PATHs_DATA=/data/grafana
@@ -22,18 +23,3 @@ services:
       - ENABLE_LOGS
     extra_hosts:
       - "host.docker.internal:host-gateway"    
-  node_exporter:
-    container_name: node
-    image: quay.io/prometheus/node-exporter:latest
-    command:
-      - '--path.rootfs=/host'
-      - '--collector.processes'
-      - '--log.level=debug'
-    network_mode: host
-    pid: host
-    restart: unless-stopped
-    volumes:
-      - '/:/host:ro,rslave'
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    privileged: true

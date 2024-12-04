@@ -1,0 +1,14 @@
+[Unit]
+Description=Prometheus Process Exporter
+After=network.target
+
+[Service]
+ExecStart=/opt/otelcol/process-exporter -config.path /etc/otelcol/process-exporter.yaml
+KillMode=mixed
+Restart=on-failure
+Type=simple
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

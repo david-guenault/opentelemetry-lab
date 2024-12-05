@@ -20,5 +20,5 @@ services:
       - ENABLE_LOGS_LOKI=true
       - ENABLE_LOGS_PROMETHEUS=true
       - ENABLE_LOGS
-    extra_hosts:
-      - "host.docker.internal:host-gateway"    
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"    

@@ -13,8 +13,7 @@ services:
       - ./container/grafana:/data/grafana
       - ./container/prometheus:/data/prometheus
       - ./container/loki:/data/loki
-      - ./dashboards/system-dashboard.json:/otel-lgtm/system-dashboard.json
-      - ./dashboards/node-exporter-full.json:/otel-lgtm/node-exporter-full.json
+      - ./dashboards:/dashboards
       - ./provisioning_dashboards:/otel-lgtm/grafana/conf/provisioning/dashboards
     environment:
       - GF_PATHs_DATA=/data/grafana

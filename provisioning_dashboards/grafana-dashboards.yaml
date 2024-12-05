@@ -4,16 +4,22 @@ providers:
   - name: 'System Monitoring'
     type: file
     options:
-      path: /otel-lgtm/system-dashboard.json
+      path: /dashboards/system-dashboard.json
       foldersFromFilesStructure: false
-  - name: 'Node exporter full'
+  - name: 'Prometheus node exporter full'
     type: file
     options:
-      path: /otel-lgtm/node-exporter-full.json
+      path: /dashboards/node-exporter-full.json
       foldersFromFilesStructure: false
   - name: 'Opentelemetry hostmetrics'
     type: file
     options:
-      path: /otel-lgtm/opentelemetry-hostmetrics.json
+      path: /dashboards/opentelemetry-hostmetrics.json
       foldersFromFilesStructure: false
+  - name: 'Prometheus process exporter'
+    type: file
+    options:
+      path: /dashboards/process-exporter.json
+      foldersFromFilesStructure: false
+
 

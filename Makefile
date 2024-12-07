@@ -18,6 +18,16 @@ status-all: otelcol-status node-exporter-status process-exporter-status stack-ps
 start-all: stack-up process-exporter-start node-exporter-start otelcol-start	
 
 stop-all: otelcol-stop node-exporter-stop process-exporter-stop stack-stop
+
+update-collectors: stop-collectors
+	sudo cp process-exporter.yaml $(ETC_FOLDER)/process-exporter.yaml
+	make otelcol-config
+	make restart-collectors
+
+stop-collectors: otelcol-stop process-exporter-stop node-exporter-stop
+
+restart-collectors: otelcol-restart process-exporter-restart node-exporter-restart
+
 process-exporter-download:
 	mkdir -p $(TMP_FOLDER)
 	curl -sL https://github.com/ncabatoff/process-exporter/releases/download/v$(PROCESS_EXPORTER_VERSION)/process-exporter-$(PROCESS_EXPORTER_VERSION).linux-amd64.tar.gz -o $(TMP_FOLDER)/process-exporter.tar.gz 

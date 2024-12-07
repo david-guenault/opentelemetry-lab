@@ -12,7 +12,9 @@ receivers:
           system.memory.utilization:
             enabled: true
           system.memory.limit:
-            enabled: true      
+            enabled: true     
+          system.linux.memory.available:
+            enabled: true 
       network:
       load:
       filesystem:

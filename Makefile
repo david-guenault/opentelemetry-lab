@@ -52,9 +52,6 @@ process-exporter-remove: process-exporter-stop
 process-exporter-stop:
 	-sudo systemctl stop process-exporter.service
 
-process-exporter-stop:
-	-sudo systemctl stop process-exporter.service
-
 process-exporter-start:
 	sudo systemctl daemon-reload
 	sudo systemctl start process-exporter.service

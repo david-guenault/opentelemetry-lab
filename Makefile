@@ -30,7 +30,7 @@ restart-collectors: otelcol-restart process-exporter-restart node-exporter-resta
 
 install-collectors: otelcol-install process-exporter-install node-exporter-install
 
-remove-collectors: otelcol-remove process-exporter-remove node-exporter-remove
+remove-collectors: stop-collectors otelcol-remove process-exporter-remove node-exporter-remove
 
 process-exporter-download:
 	mkdir -p $(TMP_FOLDER)

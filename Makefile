@@ -72,14 +72,11 @@ node-exporter-install: node-exporter-download
 	sudo setcap CAP_SYS_PTRACE,CAP_DAC_READ_SEARCH=+eip $(BIN_FOLDER)/node_exporter
 	sudo mkdir -p /etc/systemd/system/node-exporter.d /var/lib/node-exporter/textfile_collector
 	sudo cp node-exporter.service $(SYSTEMD_SERVICES_PATH)/node-exporter.service
-	# sudo cp node-exporter.socket $(SYSTEMD_SERVICES_PATH)/node-exporter.socket
 	sudo cp node-exporter.conf $(SYSTEMD_SERVICES_PATH)/node-exporter.d/node-exporter.conf
-	# sudo systemctl enable node-exporter.socket
 	sudo systemctl enable node-exporter.service
 	sudo systemctl daemon-reload
 
 node-exporter-remove: node-exporter-stop
-	# @-sudo systemctl disable node-exporter.socket
 	@-sudo systemctl disable node-exporter.service
 	sudo rm -Rf $(BIN_FOLDER)/node_exporter $(SYSTEMD_SERVICES_PATH)/node-exporter.* $(SYSTEMD_SERVICES_PATH)/node-exporter.d.* 
 	sudo systemctl daemon-reload
@@ -142,7 +139,7 @@ otelcol-config:
 stack-down:
 	docker compose down
 
-stacl-ps:
+stack-ps:
 	docker compose ps
 
 stack-up:

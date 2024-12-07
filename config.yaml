@@ -46,6 +46,7 @@ processors:
         # this allow to join the target_info metric label 
         statements:
           - set(attributes["process_command_line"], resource.attributes["process.command_line"])
+          - set(attributes["host_name"], resource.attributes["host.name"])
 
   resourcedetection/system:
     # we get the service.* metrics attributes from environment

@@ -3,14 +3,35 @@ receivers:
     collection_interval: 30s
     scrapers:
       cpu:
+        metrics:
+          system.cpu.logical.count:
+            enabled: true      
       disk:
       memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+          system.memory.limit:
+            enabled: true      
       network:
       load:
       filesystem:
+        metrics:
+          system.filesystem.utilization:
+            enabled: true      
       paging:
       processes: # process count metrics
       process: # per process cpu memory and disk io metrics
+        mute_process_user_error: true
+        metrics:
+          process.cpu.utilization:
+            enabled: true
+          process.memory.utilization:
+            enabled: true
+          process.threads:
+            enabled: true
+          process.paging.faults:
+            enabled: true      
       system:
 
   prometheus/node-exporter:
@@ -45,9 +66,14 @@ processors:
         # get process pid and executable name from resource attributes and put it on datapoint
         # this allow to join the target_info metric label 
         statements:
-          - set(attributes["process_command_line"], resource.attributes["process.command_line"])
-          - set(attributes["host_name"], resource.attributes["host.name"])
-
+          - set(attributes["host.name"], resource.attributes["host.name"])
+          - set(attributes["process.command"], resource.attributes["process.command"])
+          - set(attributes["process.command_line"], resource.attributes["process.command_line"])
+          - set(attributes["process.executable.name"], resource.attributes["process.executable.name"])
+          - set(attributes["process.executable.path"], resource.attributes["process.executable.path"])
+          - set(attributes["process.owner"], resource.attributes["process.owner"])
+          - set(attributes["process.parent_pid"], resource.attributes["process.parent_pid"])
+          - set(attributes["process.pid"], resource.attributes["process.pid"])
   resourcedetection/system:
     # we get the service.* metrics attributes from environment
     # caution this is not good for collectors requiring differents values

@@ -13,6 +13,8 @@ clean: process-exporter-stop node-exporter-stop otelcol-stop stack-remove proces
 
 bootstrap: otelcol-install node-exporter-install stack-up otelcol-start node-exporter-start
 
+status-all: otelcol-status node-exporter-status process-exporter-status stack-ps
+
 start-all: stack-up process-exporter-start node-exporter-start otelcol-start	
 
 stop-all: otelcol-stop node-exporter-stop process-exporter-stop stack-stop
@@ -48,7 +50,7 @@ process-exporter-start:
 	sudo systemctl start process-exporter.service
 
 process-exporter-status:
-	sudo systemctl status process-exporter
+	-sudo systemctl status process-exporter
 
 process-exporter-logs:
 	sudo journalctl --no-pager -fu process-exporter
@@ -91,7 +93,7 @@ node-exporter-start:
 	sudo systemctl start node-exporter.service
 
 node-exporter-status:
-	sudo systemctl status node-exporter
+	-sudo systemctl status node-exporter
 
 node-exporter-logs:
 	sudo journalctl --no-pager -fu node-exporter
@@ -128,7 +130,7 @@ otelcol-start: otelcol-config
 otelcol-restart: otelcol-stop otelcol-start
 
 otelcol-status:
-	sudo systemctl status otelcol
+	-sudo systemctl status otelcol
 
 otelcol-remove: otelcol-stop
 	sudo rm -Rf $(BIN_FOLDER)/otelcol-contrib $(ETC_FOLDER) $(SYSTEMD_SERVICES_PATH)/otelcol.service 

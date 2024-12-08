@@ -123,5 +123,5 @@ service:
     # internal telemetry
     metrics/telemetry:
       receivers: [prometheus/telemetry]
-      processors: [batch, memory_limiter, resourcedetection/system]
+      processors: [batch, memory_limiter]
       exporters: [debug,otlp]

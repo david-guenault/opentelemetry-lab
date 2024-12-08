@@ -36,6 +36,7 @@ receivers:
             enabled: true      
       system:
 
+  # internal telemetry
   prometheus/node-exporter:
     config:
       scrape_configs:
@@ -49,6 +50,14 @@ receivers:
         - job_name: 'process_exporter'
           static_configs:
             - targets: ['localhost:9256']
+
+  prometheus/telemetry:
+    config:
+      scrape_configs:
+      - job_name: otel-collector-metrics
+        scrape_interval: 10s
+        static_configs:
+        - targets: ['localhost:8888']    
 
 processors:
   batch:
@@ -65,7 +74,7 @@ processors:
     error_mode: ignore
     metric_statements:
       - context: datapoint
-        # get process pid and executable name from resource attributes and put it on datapoint
+        # get process command line and command line from resource attributes and put it on datapoint
         # this allow to join the target_info metric label 
         statements:
           - set(attributes["host.name"], resource.attributes["host.name"])
@@ -82,16 +91,26 @@ exporters:
   debug:
     verbosity: detailed
   otlp:
+    # the target endpoint for telemetry storage is also defined in an environment variable
     endpoint: ${ENDPOINT}
     tls:
       insecure: true
 
 service:
+
+  # internal telemetry
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+      level: detailed
+
   pipelines:
+
     metrics/hostmetrics:
       receivers: [hostmetrics]
       processors: [batch, memory_limiter, resourcedetection/system, transform/hostmetrics]
       exporters: [debug,otlp]
+
     metrics/node-exporter:
       receivers: [prometheus/node-exporter]
       processors: [batch, memory_limiter, resourcedetection/system]
@@ -100,3 +119,9 @@ service:
       receivers: [prometheus/process-exporter]
       processors: [batch, memory_limiter, resourcedetection/system]
       exporters: [debug,otlp]      
+
+    # internal telemetry
+    metrics/telemetry:
+      receivers: [prometheus/telemetry]
+      processors: [batch, memory_limiter, resourcedetection/system]
+      exporters: [debug,otlp]

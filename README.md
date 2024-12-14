@@ -22,41 +22,38 @@ on this url: http://localhost:3000
 
 ## usage
 
-Initialize the environment
+A makefile is available for the most common usage. The following table show the most commonly used one. 
+you can use the make command followed by the target name. Here is an example: 
 
-``` bash
+```bash
 make bootstrap
 ```
 
-Start the lgtm stack
+|make argument|description|target arguments|
+|---|---|---|
+|bootstrap|first run. initialize the lgtm stack and install all collectors ||
+|clean|stop and remove the lgtm stack and all collectors||
+|status-all|display the status of the lgtm stack and each collector||
+|stop-all|stop the collectors and then stop the lgtm stack||
+|start-all|start the lgtm stack then the collectors||
+|update-collectors|stop the collectors, redeploy configuration then start the collectors||
+|restart-collectors|restart collectorsonly restart collectors||
+
+If you want to deploy collectors on others computers / virtual machines, you just have to clone this repo on the target computer and then issue the following command: 
 
 ```bash
-make stack-up
+make collectors-install update-collectors
 ```
 
-Start otelcol (this will deploy the config each time)
+Do not forget to customize the environment file before !
 
-```bash
-make otelcol-start
-```
+## Customize preloaded dashboards
 
-Start node-exporter
+The provisioning file is located in ```provisioning_dashboards``` folder. If you want to add more dashboards, edit the configuration file for dashboard provisioning then put the dashboards json files in the ```dashboards folder```
 
-```bash
-make node-exporter-start
-```
+## Customize service labels 
 
-Start process-exporter
-
-```bash
-make process-exporter-start
-```
-
-Clean up everything
-
-```bash
-make clean
-```
+You can customize service labels **before starting the collectors**. In order to do so, ediy the environment file and modify the values in the **OTEL_RESOURCE_ATTRIBUTES** environment variable. Please do not forget to modify the **ENDPOINT**  variable to match the ip address of the computer where the stack is deployed. 
 
 # usefull resources
 

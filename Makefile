@@ -4,20 +4,23 @@ PROCESS_EXPORTER_VERSION=0.8.4
 BIN_FOLDER=/opt/otelcol
 ETC_FOLDER=/etc/otelcol
 TMP_FOLDER=/tmp/otelcol
+USER=david
+GROUP=david
 SYSTEMD_SERVICES_PATH=/etc/systemd/system
 
-bootstrap: otelcol-install process-exporter-install stack-up otelcol-restart process-exporter-start
+bootstrap: install-collectors start-all
 
-clean: process-exporter-stop node-exporter-stop otelcol-stop stack-remove process-exporter-remove otelcol-remove node-exporter-remove
+clean: stop-all stack-remove remove-collectors
 	sudo rm -Rf $(BIN_FOLDER) $(TMP_FOLDER) $(ETC_FOLDER)
-
-bootstrap: otelcol-install node-exporter-install stack-up otelcol-start node-exporter-start
 
 status-all: otelcol-status node-exporter-status process-exporter-status stack-ps
 
-start-all: stack-up process-exporter-start node-exporter-start otelcol-start	
+start-all: daemon-reload stack-up start-collectors
 
-stop-all: otelcol-stop node-exporter-stop process-exporter-stop stack-stop
+stop-all: stop-collectors stack-down
+
+daemon-reload:
+	sudo systemctl daemon-reload
 
 update-collectors: stop-collectors
 	sudo cp process-exporter.yaml $(ETC_FOLDER)/process-exporter.yaml
@@ -36,7 +39,12 @@ process-exporter-download:
 	mkdir -p $(TMP_FOLDER)
 	curl -sL https://github.com/ncabatoff/process-exporter/releases/download/v$(PROCESS_EXPORTER_VERSION)/process-exporter-$(PROCESS_EXPORTER_VERSION).linux-amd64.tar.gz -o $(TMP_FOLDER)/process-exporter.tar.gz 
 
-process-exporter-install: process-exporter-download
+fix-user:
+	sudo chown -R $(USER):$(GROUP) $(BIN_FOLDER)
+	sudo chown -R $(USER):$(GROUP) $(ETC_FOLDER)
+	sudo chown -R $(USER):$(GROUP) $(TMP_FOLDER)
+
+process-exporter-install: process-exporter-download 
 	sudo mkdir -p $(BIN_FOLDER)
 	sudo tar xvf $(TMP_FOLDER)/process-exporter.tar.gz -C $(TMP_FOLDER) --strip-components=1
 	sudo cp -a $(TMP_FOLDER)/process-exporter $(BIN_FOLDER)/
@@ -46,6 +54,9 @@ process-exporter-install: process-exporter-download
 	sudo cp process-exporter.yaml $(ETC_FOLDER)/process-exporter.yaml
 	sudo systemctl enable process-exporter.service
 	sudo systemctl daemon-reload
+	sudo sed -i "s|__USER__|$(USER)|g" $(SYSTEMD_SERVICES_PATH)/process-exporter.service
+	sudo sed -i "s|__GROUP__|$(GROUP)|g" $(SYSTEMD_SERVICES_PATH)/process-exporter.service
+	make fix-user
 
 process-exporter-remove: process-exporter-stop
 	@-sudo systemctl disable process-exporter.service
@@ -86,6 +97,9 @@ node-exporter-install: node-exporter-download
 	sudo cp node-exporter.conf $(SYSTEMD_SERVICES_PATH)/node-exporter.d/node-exporter.conf
 	sudo systemctl enable node-exporter.service
 	sudo systemctl daemon-reload
+	sudo sed -i "s|__USER__|$(USER)|g" $(SYSTEMD_SERVICES_PATH)/node-exporter.service
+	sudo sed -i "s|__GROUP__|$(GROUP)|g" $(SYSTEMD_SERVICES_PATH)/node-exporter.service
+	make fix-user
 
 node-exporter-remove: node-exporter-stop
 	@-sudo systemctl disable node-exporter.service
@@ -124,6 +138,9 @@ otelcol-install: otelcol-download
 	sudo cp otelcol.service $(SYSTEMD_SERVICES_PATH)/otelcol.service
 	make otelcol-config
 	sudo systemctl daemon-reload
+	sudo sed -i "s|__USER__|$(USER)|g" $(SYSTEMD_SERVICES_PATH)/otelcol.service
+	sudo sed -i "s|__GROUP__|$(GROUP)|g" $(SYSTEMD_SERVICES_PATH)/otelcol.service
+	make fix-user
 
 otelcol-logs:
 	journalctl --no-pager -fu otelcol
@@ -146,6 +163,8 @@ otelcol-remove: otelcol-stop
 
 otelcol-config:
 	sudo cp -a config.yaml environment $(ETC_FOLDER)
+	make fix-user
+
 
 stack-down:
 	docker compose down

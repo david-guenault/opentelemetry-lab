@@ -3,8 +3,8 @@ Description=Node Exporter
 After=network.target
 
 [Service]
-User=root
-Group=root
+User=__USER__
+Group=__GROUP__
 Type=simple
 EnvironmentFile=/etc/systemd/system/node-exporter.d/node-exporter.conf
 ExecStart=/opt/otelcol/node_exporter $OPTIONS

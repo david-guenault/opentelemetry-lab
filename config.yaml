@@ -57,7 +57,19 @@ receivers:
       - job_name: otel-collector-metrics
         scrape_interval: 10s
         static_configs:
-        - targets: ['localhost:8888']    
+        - targets: ['localhost:8888']   
+
+  journald:
+    directory: /var/log/journal 
+    units:
+      - ssh
+      - docker
+      - containerd
+      - process-exporter.service
+      - node-exporter.service
+      - otel-collector-metrics.service
+    priority: info
+
 
 processors:
   batch:
@@ -106,11 +118,19 @@ service:
 
   pipelines:
 
+    # journald logs:
+    logs/journald:
+      receivers: [journald]
+      processors: [batch, memory_limiter, resourcedetection/system]
+      exporters: [debug,otlp]
+
+    # hostmetrics
     metrics/hostmetrics:
       receivers: [hostmetrics]
       processors: [batch, memory_limiter, resourcedetection/system, transform/hostmetrics]
       exporters: [debug,otlp]
 
+    # exporters
     metrics/node-exporter:
       receivers: [prometheus/node-exporter]
       processors: [batch, memory_limiter, resourcedetection/system]

@@ -7,10 +7,10 @@ TMP_FOLDER=/tmp/otelcol
 USER=david
 GROUP=david
 SYSTEMD_SERVICES_PATH=/etc/systemd/system
-
+PYTHON=python3.12
 bootstrap: install-collectors start-all
 
-clean: stop-all stack-remove remove-collectors
+clean: stop-all stack-remove remove-collectors ansible-clean
 	sudo rm -Rf $(BIN_FOLDER) $(TMP_FOLDER) $(ETC_FOLDER)
 
 status-all: otelcol-status node-exporter-status process-exporter-status stack-ps
@@ -188,5 +188,15 @@ stack-remove: stack-reset
 	-docker compose rm -vf 
 	-docker rmi grafana/otel-lgtm
 	-docker rmi quay.io/prometheus/node-exporter
+
+# ansible setup
+
+ansible-venv:
+	$(PYTHON) -m venv venv
+	venv/bin/pip install --upgrade pip wheel setuptools
+	venv/bin/pip install -r requirements.txt
+
+ansible-clean:
+	rm -Rf venv
 
 .PHONY: *

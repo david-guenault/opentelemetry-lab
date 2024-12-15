@@ -1,0 +1,13 @@
+[Unit]
+Description=Node Exporter
+After=network.target
+
+[Service]
+User={{node_exporter.owner}}
+Group={{node_exporter.group}}
+Type=simple
+EnvironmentFile=/etc/systemd/system/node-exporter.d/node-exporter.conf
+ExecStart={{node_exporter.path}}/node_exporter $OPTIONS
+
+[Install]
+WantedBy=multi-user.target

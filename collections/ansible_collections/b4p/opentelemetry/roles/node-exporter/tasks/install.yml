@@ -1,0 +1,77 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for node-exporter
+
+- name: get architecture
+  set_fact:
+    arch: "{{ ansible_architecture | replace('x86_64', 'amd64') }}"
+    system: "{{ ansible_system | lower }}"
+
+- name: download node-exporter archive
+  get_url:
+    url: "{{node_exporter.download_base_url}}/v{{ node_exporter.version }}/node_exporter-{{ node_exporter.version }}.{{ system }}-{{ arch }}.tar.gz"
+    dest: /tmp/node_exporter.tar.gz
+
+- name: create group  
+  group:
+    name: "{{ node_exporter.group }}"
+    state: present  
+
+- name: create user
+  user:
+    name: "{{ node_exporter.owner }}"
+    state: present
+
+- name: create layout
+  file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ node_exporter.owner }}"
+    group: "{{ node_exporter.group }}"
+    mode: 0755
+  loop:
+    - "{{ node_exporter.path }}"
+    - "{{ node_exporter.path }}/bin"
+    - "/var/lib/node-exporter/textfile_collector"
+    - "/etc/systemd/system/node-exporter.d"
+
+- name: extract archive to layout
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: "{{ node_exporter.path }}"
+    owner: "{{ node_exporter.owner }}"
+    group: "{{ node_exporter.group }}"
+    extra_opts: [--strip-components=1]
+
+- name: cleanup
+  file:
+    name: "{{item}}"
+    state: absent
+    force: true
+  loop:
+    - /tmp/node_exporter.tar.gz 
+    - /opt/node-exporter/bin/LICENSE
+    - /opt/node-exporter/bin/NOTICE 
+
+- name: apply cgroups options to node-exporter
+  community.general.capabilities:
+    path: "{{node_exporter.path}}/node_exporter"
+    capability: "{{item}}"
+  loop: 
+    - CAP_SYS_PTRACE,CAP_DAC_READ_SEARCH=+eip
+
+- name: deploy systemd unit
+  template:
+    src: node-exporter.service
+    dest: /etc/systemd/system/node-exporter.service
+
+- name: deploy systemd config options
+  template:
+    src: node-exporter.conf
+    dest: /etc/systemd/system/node-exporter.d/node-exporter.conf
+
+- name: enable node-exporter  
+  systemd:
+    name: node-exporter.service
+    state: started
+    daemon_reload: true

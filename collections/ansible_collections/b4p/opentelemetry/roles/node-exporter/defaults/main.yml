@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for node-exporter
+node_exporter:
+  version: 1.8.2
+  path: /opt/node-exporter
+  download_base_url: https://github.com/prometheus/node_exporter/releases/download
+  owner: node_exporter
+  group: node_exporter
+  options:  --web.listen-address=:9100 --log.level debug  --collector.processes --collector.cpu_vulnerabilities --collector.systemd

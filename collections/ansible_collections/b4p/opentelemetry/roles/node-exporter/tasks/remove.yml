@@ -1,0 +1,26 @@
+---
+
+- name: stop node-exporter
+  systemd:
+    name: node-exporter.service
+    state: stopped
+
+- name: remove node-exporter
+  file:
+    path: "{{item}}"
+    state: absent
+  loop:
+    - "{{node_exporter.path}}"
+    - "/etc/systemd/system/node-exporter.service"
+    - "/etc/systemd/system/node-exporter.d"
+    - "/var/lib/node-exporter/textfile_collector"
+
+- name: remove user 
+  user:
+    name: "{{ node_exporter.owner }}"
+    state: absent
+
+- name: remove group
+  group:
+    name: "{{ node_exporter.group }}"
+    state: absent

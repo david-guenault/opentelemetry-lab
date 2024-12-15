@@ -1,0 +1,13 @@
+---
+- name: deploy prometheus exporters
+  hosts: exporters
+  become: true
+  
+  collections:
+    - b4p.opentelemetry
+
+  tasks:
+    - include_role:
+        name: node-exporter
+        tasks_from: install
+
